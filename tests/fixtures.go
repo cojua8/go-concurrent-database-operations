@@ -2,6 +2,8 @@ package tests
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -21,7 +23,9 @@ func InitDB() (*sql.DB, error) {
 }
 
 func connectDb() (*sql.DB, error) {
-	db, err := sql.Open("pgx", "host=db user=postgres dbname=postgres password=postgres")
+	connectionString := fmt.Sprintf("host=%s user=%s dbname=%s password=%s",
+		os.Getenv("POSTGRES_HOSTNAME"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_PASSWORD"))
+	db, err := sql.Open("pgx", connectionString)
 	if err != nil {
 		return nil, err
 	}

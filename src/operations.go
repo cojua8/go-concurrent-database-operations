@@ -13,7 +13,7 @@ type Query interface {
 
 func Process(q Query, who int, waitBeforeStock, waitBeforeOrders, waitBeforeUpdate time.Duration) error {
 	time.Sleep(waitBeforeStock)
-	stock, err := GetProductStock(q)
+	stock, err := getProductStock(q)
 	if err != nil {
 		return err
 	}
@@ -24,13 +24,13 @@ func Process(q Query, who int, waitBeforeStock, waitBeforeOrders, waitBeforeUpda
 	}
 
 	time.Sleep(waitBeforeOrders)
-	if err := InsertOrder(q); err != nil {
+	if err := insertOrder(q); err != nil {
 		return err
 	}
 	fmt.Println("User", who, "inserted order")
 
 	time.Sleep(waitBeforeUpdate)
-	if err := UpdateProductStock(q); err != nil {
+	if err := updateProductStock(q); err != nil {
 		return err
 	}
 	fmt.Println("User", who, "updated stock")
@@ -38,7 +38,7 @@ func Process(q Query, who int, waitBeforeStock, waitBeforeOrders, waitBeforeUpda
 	return nil
 }
 
-func GetProductStock(q Query) (int, error) {
+func getProductStock(q Query) (int, error) {
 	var stock int
 	if err := q.QueryRow("SELECT stock FROM products WHERE id = 1").Scan(&stock); err != nil {
 		return 0, err
@@ -46,14 +46,14 @@ func GetProductStock(q Query) (int, error) {
 	return stock, nil
 }
 
-func InsertOrder(q Query) error {
+func insertOrder(q Query) error {
 	if _, err := q.Exec("INSERT INTO orders (product_id, amount) VALUES (1, 2)"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateProductStock(q Query) error {
+func updateProductStock(q Query) error {
 	if _, err := q.Exec("UPDATE products SET stock = stock - 2 WHERE id = 1"); err != nil {
 		return err
 	}
